@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Calculadora de Crecimiento</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Íconos para dispositivos -->
+  <link rel="icon" href="icon.png">
+  <link rel="apple-touch-icon" href="icon.png">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 400px;
+      margin: auto;
+    }
+    input, button {
+      display: block;
+      margin-top: 10px;
+      width: 100%;
+      padding: 8px;
+    }
+    #resultado {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>Calculadora de Crecimiento de Facturación</h2>
+  
+  <label for="anterior">Facturación Año Anterior:</label>
+  <input type="number" id="anterior" placeholder="Ej: 100000">
+
+  <label for="actual">Facturación Año Actual:</label>
+  <input type="number" id="actual" placeholder="Ej: 120000">
+
+  <button onclick="calcularCrecimiento()">Calcular</button>
+
+  <div id="resultado"></div>
+
+  <script>
+    function calcularCrecimiento() {
+      const anterior = parseFloat(document.getElementById('anterior').value);
+      const actual = parseFloat(document.getElementById('actual').value);
+      const resultado = document.getElementById('resultado');
+
+      if (isNaN(anterior) || isNaN(actual) || anterior === 0) {
+        resultado.textContent = "Por favor ingresa valores válidos (el año anterior no puede ser cero).";
+        return;
+      }
+
+      const cambio = ((actual - anterior) / anterior) * 100;
+      const texto = cambio >= 0 
+        ? `Crecimiento del ${cambio.toFixed(2)}%`
+        : `Decrecimiento del ${Math.abs(cambio).toFixed(2)}%`;
+
+      resultado.textContent = texto;
+    }
+
+    // Registrar el service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('Service Worker registrado'))
+        .catch(error => console.log('Error al registrar Service Worker:', error));
+    }
+  </script>
+</body>
+</html>
