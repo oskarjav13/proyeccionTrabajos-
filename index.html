@@ -2,55 +2,111 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Calculadora de Crecimiento</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#ffffff">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- Íconos para dispositivos -->
+  <title>Calculadoras de Crecimiento</title>
+  <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.png">
   <link rel="apple-touch-icon" href="icon.png">
+  <meta name="theme-color" content="#0d6efd">
 
   <style>
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
+      background-color: #e8f0ff;
+    }
+
+    h2 {
+      color: #0d6efd;
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .calculator {
+      flex: 1 1 300px;
       padding: 20px;
-      max-width: 400px;
-      margin: auto;
+      background-color: white;
+      border: 1px solid #cce;
+      margin: 10px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
     }
+
     input, button {
-      display: block;
-      margin-top: 10px;
       width: 100%;
-      padding: 8px;
+      margin-top: 8px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1em;
     }
-    #resultado {
-      margin-top: 20px;
+
+    button {
+      background-color: #0d6efd;
+      color: white;
       font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s ease-in-out;
+    }
+
+    button:hover {
+      background-color: #0b5ed7;
+    }
+
+    .resultado {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #0d6efd;
     }
   </style>
 </head>
 <body>
-  <h2>Calculadora de Crecimiento de Facturación</h2>
-  
-  <label for="anterior">Facturación Año Anterior:</label>
-  <input type="number" id="anterior" placeholder="Ej: 100000">
 
-  <label for="actual">Facturación Año Actual:</label>
-  <input type="number" id="actual" placeholder="Ej: 120000">
+  <div class="container">
+    <!-- CALCULADORA 1: Crecimiento Anual -->
+    <div class="calculator">
+      <h2>Crecimiento Anual</h2>
+      <label>Facturación Año Anterior:</label>
+      <input type="number" id="anterior" placeholder="Ej: 100000">
 
-  <button onclick="calcularCrecimiento()">Calcular</button>
+      <label>Facturación Año Actual:</label>
+      <input type="number" id="actual" placeholder="Ej: 120000">
 
-  <div id="resultado"></div>
+      <button onclick="calcularCrecimientoAnual()">Calcular</button>
+      <div id="resultadoAnual" class="resultado"></div>
+    </div>
+
+    <!-- CALCULADORA 2: Crecimiento Mensual Ajustado -->
+    <div class="calculator">
+      <h2>Crecimiento Mensual Ajustado</h2>
+      <label>Facturación del mismo mes (año anterior):</label>
+      <input type="number" id="mesAnterior" placeholder="Ej: 30000">
+
+      <label>Facturación del mes actual (hasta hoy):</label>
+      <input type="number" id="mesActual" placeholder="Ej: 20000">
+
+      <label>Días hábiles del mes actual:</label>
+      <input type="number" id="diasHabiles" placeholder="Ej: 22">
+
+      <label>Día actual del mes:</label>
+      <input type="number" id="diaHoy" placeholder="Ej: 15">
+
+      <button onclick="calcularCrecimientoMensual()">Calcular</button>
+      <div id="resultadoMensual" class="resultado"></div>
+    </div>
+  </div>
 
   <script>
-    function calcularCrecimiento() {
+    function calcularCrecimientoAnual() {
       const anterior = parseFloat(document.getElementById('anterior').value);
       const actual = parseFloat(document.getElementById('actual').value);
-      const resultado = document.getElementById('resultado');
+      const resultado = document.getElementById('resultadoAnual');
 
       if (isNaN(anterior) || isNaN(actual) || anterior === 0) {
-        resultado.textContent = "Por favor ingresa valores válidos (el año anterior no puede ser cero).";
+        resultado.textContent = "Ingresa valores válidos.";
         return;
       }
 
@@ -62,7 +118,33 @@
       resultado.textContent = texto;
     }
 
-    // Registrar el service worker
+    function calcularCrecimientoMensual() {
+      const anterior = parseFloat(document.getElementById('mesAnterior').value);
+      const actual = parseFloat(document.getElementById('mesActual').value);
+      const diasHabiles = parseInt(document.getElementById('diasHabiles').value);
+      const diaHoy = parseInt(document.getElementById('diaHoy').value);
+      const resultado = document.getElementById('resultadoMensual');
+
+      if (
+        isNaN(anterior) || isNaN(actual) || isNaN(diasHabiles) || isNaN(diaHoy) ||
+        anterior === 0 || diasHabiles === 0 || diaHoy > diasHabiles
+      ) {
+        resultado.textContent = "Ingresa todos los valores correctamente.";
+        return;
+      }
+
+      const proporcionMes = diaHoy / diasHabiles;
+      const esperadoHastaHoy = anterior * proporcionMes;
+      const cambio = ((actual - esperadoHastaHoy) / esperadoHastaHoy) * 100;
+
+      const texto = cambio >= 0
+        ? `Crecimiento del ${cambio.toFixed(2)}% respecto al mes pasado`
+        : `Decrecimiento del ${Math.abs(cambio).toFixed(2)}% respecto al mes pasado`;
+
+      resultado.textContent = texto;
+    }
+
+    // Service Worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js')
         .then(() => console.log('Service Worker registrado'))
